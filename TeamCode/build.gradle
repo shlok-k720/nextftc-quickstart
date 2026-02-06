@@ -23,6 +23,17 @@ android {
     }
 }
 
+
 dependencies {
     implementation project(':FtcRobotController')
+
+    // NEXT FTC
+    implementation 'dev.nextftc:ftc:1.0.1'
+    implementation 'dev.nextftc:hardware:1.0.1'
+    // NEXT CONTROL
+    implementation 'dev.nextftc:control:1.0.0'
+    // NEXT BINDINGS
+    implementation 'dev.nextftc:bindings:1.0.1'
+    // NEXT EXTENSIONS (PEDRO)
+    implementation 'dev.nextftc.extensions:pedro:1.0.0'
 }
