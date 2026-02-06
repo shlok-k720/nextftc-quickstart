@@ -31,9 +31,11 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// you can then access the follower as follower()
-// for example:
+
+
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
+import org.firstinspires.ftc.teamcode.mechanisms.Transfer;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.components.Component;
@@ -50,18 +52,94 @@ public class NextRobotTeleOp extends NextFTCOpMode {
         addComponents(
                 new PedroComponent(Constants::createFollower)
         );
+        
+        // Subsystems are automatically managed by NextFTC
+        addSubsystems(
+                Intake.INSTANCE,
+                Launcher.INSTANCE,
+                Transfer.INSTANCE
+        );
     }
 
-    DriverControlledCommand driverControlled = new PedroDriverControlled(
-            Gamepads.gamepad1().leftStickY(),
-            Gamepads.gamepad1().leftStickX(),
-            Gamepads.gamepad1().rightStickX(),
-            true
-    );
+    private DriverControlledCommand driverControlled;
 
     @Override
     public void onInit() {
+        // Initialize all mechanisms
+        Launcher.init(hardwareMap);
+        
+        // Initialize driver control
+        driverControlled = new PedroDriverControlled(
+                Gamepads.gamepad1().leftStickY(),
+                Gamepads.gamepad1().leftStickX(),
+                Gamepads.gamepad1().rightStickX(),
+                true
+        );
         driverControlled.schedule();
+        
+        // Add telemetry header
+        telemetry.addLine("NextRobot TeleOp Initialized");
+        telemetry.addLine("Controls:");
+        telemetry.addLine("- Right Trigger: Intake");
+        telemetry.addLine("- Left Trigger: Outtake");
+        telemetry.addLine("- Right Bumper: Launch");
+        telemetry.addLine("- A Button: Feed");
+        telemetry.update();
+    }
+
+    @Override
+    public void onLoop() {
+        // INTAKE CONTROL
+        double rightTrigger = Gamepads.gamepad1().rightTrigger().get();
+        double leftTrigger = Gamepads.gamepad1().leftTrigger().get();
+        
+        if (rightTrigger > 0.2) {
+            Intake.INSTANCE.intake(rightTrigger);
+        } else if (leftTrigger > 0.2) {
+            Intake.INSTANCE.outtake(leftTrigger);
+        } else {
+            Intake.INSTANCE.stop();
+        }
+
+        // LAUNCHER CONTROL
+        if (Gamepads.gamepad1().rightBumper().get()) {
+            Launcher.INSTANCE.shootRPM(4500);
+        } else {
+            Launcher.INSTANCE.stop();
+        }
+
+        // TRANSFER / FEEDER
+        if (Gamepads.gamepad1().a().get()) {
+            Transfer.INSTANCE.feed();
+        } else {
+            Transfer.INSTANCE.stop();
+        }
+        
+        // TELEMETRY
+        updateTelemetry();
+    }
+    
+    private void updateTelemetry() {
+        telemetry.addData("Status", "Running");
+        telemetry.addLine();
+        
+        // Intake status
+        telemetry.addData("Intake Running", Intake.INSTANCE.isRunning());
+        telemetry.addData("Intake Power", "%.2f", Intake.INSTANCE.getTargetPower());
+        
+        // Launcher status
+        telemetry.addData("Launcher Running", Launcher.INSTANCE.isRunning());
+        if (Launcher.INSTANCE.isRunning()) {
+            telemetry.addData("Launcher RPM", "%.0f", Launcher.INSTANCE.getRPM());
+        }
+        
+        // Transfer status
+        telemetry.addData("Transfer Running", Transfer.INSTANCE.isRunning());
+        if (Transfer.INSTANCE.isRunning()) {
+            telemetry.addData("Transfer Power", "%.2f", Transfer.INSTANCE.getTargetPower());
+        }
+        
+        telemetry.update();
     }
 
 }

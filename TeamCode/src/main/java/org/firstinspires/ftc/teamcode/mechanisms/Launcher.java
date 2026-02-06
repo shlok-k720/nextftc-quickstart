@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Launcher implements Subsystem {
-    public static Launcher INSTANCE;
+    public static Launcher INSTANCE = null;
     private DcMotorEx launcherMotor;
 
     /* =====================

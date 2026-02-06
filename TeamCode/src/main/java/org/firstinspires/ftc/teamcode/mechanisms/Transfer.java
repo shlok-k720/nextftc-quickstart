@@ -6,7 +6,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Transfer implements Subsystem {
-    public static final Intake INSTANCE = new Intake();
+    public static final Transfer INSTANCE = new Transfer();
 
     private MotorEx transferMotor;
 
@@ -44,10 +44,15 @@ public class Transfer implements Subsystem {
        Control API
        ===================== */
 
-    /** Run transfer */
-    public void transfer() {
-        targetPower = 0.5;
+    /** Run transfer at specified power */
+    public void feed(double power) {
+        targetPower = Math.max(0, Math.min(1.0, power));
         enabled = true;
+    }
+
+    /** Run transfer at default power */
+    public void feed() {
+        feed(0.5);
     }
 
     /** Stop transfer */
